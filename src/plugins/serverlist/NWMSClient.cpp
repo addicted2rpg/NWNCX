@@ -27,9 +27,14 @@ void NWNMSClient::RequestServerList(int roomId)
 	fflush(logFile);
 
 	this->currentRoom = roomId;
+
+	// params is virusman's struct for tracking client object and roomid :)
+	// imo I would of thought malloc is better but I guess MS is smart enough enough not to delete 
+	// at end of function when using their QueueUserWorkItem (a ref to the allocated memory)
 	RequestThreadParams *params = new RequestThreadParams;
 	params->client = this;
 	params->roomId = roomId;
+	// that last NULL parameter is the same as WT_EXECUTEDEFAULT... good grief..
 	QueueUserWorkItem((LPTHREAD_START_ROUTINE) NWNMSClient::RequestThread, params, NULL);
 }
 
@@ -73,6 +78,7 @@ bool NWNMSClient::HasResults()
 	return result;
 }
 
+// This is the start function for the queued thread.  It doesn't actually request a thread :)
 DWORD WINAPI NWNMSClient::RequestThread(void *param)
 {
 	NWNMSClient *client;
@@ -128,20 +134,7 @@ DWORD WINAPI NWNMSClient::RequestThread(void *param)
 }
 
 
-	// The room list
-	// Action       nRoom=274   *(c->NWGameServer[i]->GameType) = 13;
-	// Roleplay     nRoom=275   *(c->NWGameServer[i]->GameType) = 3;
-	// Team         nRoom=276   *(c->NWGameServer[i]->GameType) = 4;
-	// Social       nRoom=277   *(c->NWGameServer[i]->GameType) = 7;
-	// PW Action    nRoom=278   *(c->NWGameServer[i]->GameType) = 9;
-	// Alternative  nRoom=279   *(c->NWGameServer[i]->GameType) = 8;
-	// Story        nRoom=363   *(c->NWGameServer[i]->GameType) = 1;
-	// Story Lite   nRoom=364   *(c->NWGameServer[i]->GameType) = 2; 
-	// Melee        nRoom=365   *(c->NWGameServer[i]->GameType) = 5;
-	// Arena        nRoom=366   *(c->NWGameServer[i]->GameType) = 6;
-	// PW Story     nRoom=367   *(c->NWGameServer[i]->GameType) = 10;
-	// Solo         nRoom=368   *(c->NWGameServer[i]->GameType) = 11;
-	// Tech Support nRoom=370   *(c->NWGameServer[i]->GameType) = 12;
+
 int NWNMSClient::RoomToSkywing(int room) {
 
 	switch(room) {
